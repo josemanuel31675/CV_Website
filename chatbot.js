@@ -10,7 +10,7 @@ const CV_DATA = {
     fallback: "I'm not sure about that, but you can ask about his experience, location, specific projects, skills, or how to contact him."
 };
 
-let DYNAMIC_DATA = {}; // Loaded from Google Sheets
+let DYNAMIC_DATA = {}; // Correctly using 'let' for dynamic reassignment
 
 const initChatbot = () => {
     // Prevent double initialization
