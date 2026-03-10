@@ -100,14 +100,22 @@ const initChatbot = () => {
             } else if (q.includes('hi') || q.includes('hello') || q.includes('hey')) {
                 addMessage("Hello! I'm ready to answer questions about José's career.", 'ai');
             } 
-            // 2. Check Dynamic Knowledge from Google Sheet
-            else if (DYNAMIC_DATA[q]) {
-                addMessage(DYNAMIC_DATA[q], 'ai');
-            }
-            // 3. Fallback and Log
+            // 2. Check Dynamic Knowledge from Google Sheet (Flexible search)
             else {
-                addMessage(CV_DATA.fallback, 'ai');
-                logUnknownQuestion(query);
+                let foundDynamic = false;
+                for (const key in DYNAMIC_DATA) {
+                    if (q.includes(key.replace(/[?¿!¡]/g, '').toLowerCase().trim())) {
+                        addMessage(DYNAMIC_DATA[key], 'ai');
+                        foundDynamic = true;
+                        break;
+                    }
+                }
+                
+                if (!foundDynamic) {
+                    // 3. Fallback and Log
+                    addMessage(CV_DATA.fallback, 'ai');
+                    logUnknownQuestion(query);
+                }
             }
         }, 800);
     };
