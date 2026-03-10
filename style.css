@@ -283,3 +283,100 @@ footer p {
         font-size: 2rem;
     }
 }
+
+/* --- Page Specific Styles --- */
+
+/* Experience Page */
+.experience-card {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    border-left: 4px solid var(--primary);
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.experience-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: var(--secondary);
+    margin-bottom: 0.5rem;
+}
+
+.experience-company {
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.experience-date {
+    color: var(--muted-text);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.experience-details {
+    list-style-type: disc;
+    padding-left: 20px;
+}
+
+.experience-details li {
+    margin-bottom: 0.5rem;
+}
+
+/* About (Who Am I) Page */
+.profile-section {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+}
+
+.avatar-placeholder {
+    width: 150px;
+    height: 150px;
+    background-color: var(--accent);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-size: 3rem;
+    font-weight: bold;
+}
+
+@media (max-width: 768px) {
+    .profile-section {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+/* Projects Page */
+.project-link {
+    display: inline-block;
+    margin-top: 15px;
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+    border-bottom: 2px solid transparent;
+    transition: var(--transition);
+}
+
+.project-link:hover {
+    border-bottom-color: var(--primary);
+    padding-left: 5px;
+}
+
+.project-meta {
+    font-size: 0.85rem;
+    color: var(--muted-text);
+    margin-bottom: 10px;
+    display: flex;
+    gap: 10px;
+}
+
+.tag {
+    background: #eef2f7;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+}
