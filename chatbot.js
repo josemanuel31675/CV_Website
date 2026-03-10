@@ -1,7 +1,3 @@
-/**
- * JMAM CV Assistant - Chatbot Logic
- */
-
 const CV_DATA = {
     introduction: "I'm the digital assistant of José Manuel. Expert in .NET & SQL Server with 15+ years of experience. How can I help you today?",
     location: "José Manuel is originally from Mexico and is currently based in Monterrey, Nuevo León, known as the industrial and tech hub of the country.",
@@ -13,6 +9,8 @@ const CV_DATA = {
     hidden_projects: "He has extensive experience in the financial and manufacturing sectors, developing internal systems for audit management, payroll processing, and real-time inventory tracking for high-demand industrial environments.",
     fallback: "I'm not sure about that, but you can ask about his experience, location, specific projects, skills, or how to contact him."
 };
+
+let DYNAMIC_DATA = {}; // Loaded from Google Sheets
 
 const initChatbot = () => {
     // Prevent double initialization
@@ -45,6 +43,14 @@ const initChatbot = () => {
     `;
     document.body.insertAdjacentHTML('beforeend', chatbotHTML);
 
+    // Fetch dynamic knowledge from Google Sheets
+    if (typeof GOOGLE_SCRIPT_URL !== 'undefined' && GOOGLE_SCRIPT_URL !== "YOUR_GOOGLE_SCRIPT_URL") {
+        fetch(GOOGLE_SCRIPT_URL)
+            .then(res => res.json())
+            .then(data => { DYNAMIC_DATA = data; })
+            .catch(e => console.warn("Could not load dynamic data"));
+    }
+
     const bubble = document.getElementById('cb-bubble');
     const windowChat = document.getElementById('cb-window');
     const close = document.querySelector('.cb-close');
@@ -64,7 +70,7 @@ const initChatbot = () => {
     };
 
     const processQuery = (query) => {
-        const q = query.toLowerCase();
+        const q = query.toLowerCase().trim();
         addMessage(query, 'user');
 
         const typing = document.createElement('div');
@@ -75,6 +81,8 @@ const initChatbot = () => {
 
         setTimeout(() => {
             typing.remove();
+            
+            // 1. Check Hardcoded Data
             if (q.includes('experience') || q.includes('work') || q.includes('career')) {
                 addMessage(CV_DATA.experience, 'ai');
             } else if (q.includes('skill') || q.includes('tech') || q.includes('know') || q.includes('stack')) {
@@ -91,9 +99,14 @@ const initChatbot = () => {
                 addMessage(CV_DATA.projects, 'ai');
             } else if (q.includes('hi') || q.includes('hello') || q.includes('hey')) {
                 addMessage("Hello! I'm ready to answer questions about José's career.", 'ai');
-            } else {
+            } 
+            // 2. Check Dynamic Knowledge from Google Sheet
+            else if (DYNAMIC_DATA[q]) {
+                addMessage(DYNAMIC_DATA[q], 'ai');
+            }
+            // 3. Fallback and Log
+            else {
                 addMessage(CV_DATA.fallback, 'ai');
-                // LOG UNKNOWN QUESTION
                 logUnknownQuestion(query);
             }
         }, 800);
