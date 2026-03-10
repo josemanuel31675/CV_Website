@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,9 +12,11 @@
             margin: 100px auto;
             text-align: center;
         }
+
         #stats-content {
             display: none;
         }
+
         .stat-banner {
             background: var(--card-bg);
             padding: 40px;
@@ -22,6 +25,7 @@
             text-align: center;
             margin-top: 40px;
         }
+
         .stat-number {
             font-size: 4rem;
             color: var(--primary);
@@ -29,6 +33,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <header id="main-nav"></header>
@@ -38,7 +43,8 @@
         <div id="login-section" class="login-container card">
             <h3>Admin Access</h3>
             <p>Please enter your credentials to view site statistics.</p>
-            <input type="password" id="admin-pass" placeholder="Password" class="skill-badge" style="width: 80%; margin: 20px 0; border: 1px solid #ccc;">
+            <input type="password" id="admin-pass" placeholder="Password" class="skill-badge"
+                style="width: 80%; margin: 20px 0; border: 1px solid #ccc;">
             <br>
             <button onclick="checkAccess()" class="btn">Login</button>
             <p id="login-error" style="color: red; display: none; margin-top: 10px;">Incorrect Password</p>
@@ -91,4 +97,5 @@
     </script>
     <script src="navigation.min.js"></script>
 </body>
+
 </html>
