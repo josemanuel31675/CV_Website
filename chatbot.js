@@ -123,35 +123,40 @@ const initChatbot = () => {
                 if (!foundDynamic) {
                     // 3. Fallback and Log
                     addMessage(CV_DATA.fallback, 'ai');
-                    logUnknownQuestion(query);
+                    // Log in background to avoid blocking
+                    setTimeout(() => logUnknownQuestion(query), 100);
                 }
             }
         }, 800);
     };
 
     const logUnknownQuestion = (text) => {
-        // 1. Increment local counter
-        new Image().src = 'https://api.counterapi.dev/v1/josemanuel31675-cv/questions/up';
-        
-        // 2. Email Notification (Backup)
-        fetch('https://formsubmit.co/ajax/jose_alvarado@live.com.mx', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: text })
-        });
+        try {
+            // 1. Counter
+            new Image().src = `https://api.counterapi.dev/v1/josemanuel31675-cv/questions/up?t=${Date.now()}`;
+            
+            // 2. Save to Google Sheet (Primary)
+            saveToGoogleSheet(text);
 
-        // 3. Save to Google Sheet (The New Database)
-        saveToGoogleSheet(text);
+            // 3. Email (Backup/Optional) - Moving this to the end
+            fetch('https://formsubmit.co/ajax/jose_alvarado@live.com.mx', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: text, _subject: "Chatbot Unknown Question" })
+            }).catch(() => {});
+        } catch (e) {
+            console.warn("Logging ignored", e);
+        }
     }
 
     const saveToGoogleSheet = async (question) => {
-        if (typeof GOOGLE_SCRIPT_URL === 'undefined' || GOOGLE_SCRIPT_URL === "YOUR_GOOGLE_SCRIPT_URL") return;
+        if (typeof GOOGLE_SCRIPT_URL === 'undefined' || GOOGLE_SCRIPT_URL.includes("YOUR_GOOGLE_SCRIPT_URL")) return;
 
         try {
+            // Using a simple POST without headers to avoid CORS preflight issues
             await fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
                 mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     type: 'Question',
                     page: window.location.pathname,
