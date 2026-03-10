@@ -71,37 +71,7 @@
         </div>
     </footer>
 
-    <script>
-        // Simple obfuscated check for "JMAM2026"
-        function checkAccess() {
-            const pass = document.getElementById('admin-pass').value;
-            // Basic check (not military grade, but works for an "hidden" page)
-            if (pass === 'JMAM2026') {
-                document.getElementById('login-section').style.display = 'none';
-                document.getElementById('stats-content').style.display = 'block';
-                loadStats();
-            } else {
-                document.getElementById('login-error').style.display = 'block';
-            }
-        }
-
-        async function loadStats() {
-            try {
-                // Correct path for counterapi.dev: /v1/{namespace}/{key}
-                const response = await fetch('https://api.counterapi.dev/v1/josemanuel31675-cv/visits');
-                if (response.status === 404 || response.status === 400) {
-                    document.getElementById('visit-count').innerText = '0';
-                    return;
-                }
-                const data = await response.json();
-                document.getElementById('visit-count').innerText = data.count !== undefined ? data.count : '0';
-            } catch (error) {
-                console.error('Stats error:', error);
-                document.getElementById('visit-count').innerText = '0';
-            }
-        }
-    </script>
+    <script src="auth.min.js"></script>
     <script src="navigation.min.js"></script>
 </body>
-
 </html>
