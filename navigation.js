@@ -1,24 +1,47 @@
+// Configuration for Google Sheets API (Your Database)
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxcKxPLUm13QWQBV9sOaymcUOhwrb6F350CEgikiolcIxAp2k4rEjj2GmYwN8lPpAEa/exec";
+
 // Redirection logic: Ensure users start at Home on their first visit of the session
-(function() {
+(function () {
     const page = window.location.pathname.split("/").pop() || 'index.html';
     let sessionID = sessionStorage.getItem('cv_session_id');
 
     if (!sessionID) {
-        localStorage.removeItem('cv_visited'); 
+        localStorage.removeItem('cv_visited');
         sessionID = 'cv_sess_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now();
         sessionStorage.setItem('cv_session_id', sessionID);
 
-        // Increment visitor counter using Image object to bypass CORS completely
-        // Switching back to countapi.xyz which has better CORS support for reading
-        const hit = new Image();
-        hit.src = 'https://api.countapi.xyz/hit/josemanuel31675-cv-portfolio/visits';
-        
+        // 1. Quick counter (Legacy Support)
+        new Image().src = 'https://api.counterapi.dev/v1/josemanuel31675-cv/visits/up';
+
+        // 2. Log Detailed Visit to Google Sheets
+        logToGoogleSheet({
+            type: 'Visit',
+            page: page,
+            userAgent: navigator.userAgent
+        });
+
         if (page !== 'index.html' && page !== '') {
             window.location.href = 'index.html';
             return;
         }
     }
 })();
+
+async function logToGoogleSheet(data) {
+    if (GOOGLE_SCRIPT_URL === "YOUR_GOOGLE_SCRIPT_URL") return;
+
+    try {
+        await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors', // Essential for Google Scripts redirect
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+    } catch (e) {
+        console.warn("Logging failed", e);
+    }
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     const navContainer = document.getElementById('main-nav');
@@ -39,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
     navContainer.innerHTML = navHTML;
 
-    // Inject Chatbot resources
+    // Inject Chatbot
     if (!document.getElementById('chatbot-css')) {
         const link = document.createElement('link');
         link.id = 'chatbot-css';
@@ -47,12 +70,11 @@ document.addEventListener('DOMContentLoaded', () => {
         link.href = 'chatbot.css';
         document.head.appendChild(link);
     }
-    
+
     if (!document.getElementById('chatbot-js')) {
         const script = document.createElement('script');
         script.id = 'chatbot-js';
-        script.src = 'chatbot.js';
+        script.src = 'chatbot.min.js';
         document.body.appendChild(script);
     }
 });
-

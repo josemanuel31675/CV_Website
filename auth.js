@@ -32,53 +32,39 @@ async function hashString(str) {
 
 async function loadStats() {
     const countDisplay = document.getElementById('visit-count');
+    const questionsDisplay = document.getElementById('questions-count');
     const jsonArea = document.getElementById('raw-json');
     
-    if (!jsonArea) {
-        console.error("Textarea 'raw-json' not found in DOM.");
-        return;
-    }
+    if (!countDisplay || !questionsDisplay || !jsonArea) return;
 
     countDisplay.innerText = "Loading...";
+    questionsDisplay.innerText = "Loading...";
     jsonArea.value = "Initiating request...";
     
-    const targetUrl = `https://api.counterapi.dev/v1/josemanuel31675-cv/visits`;
+    const visitsUrl = `https://api.counterapi.dev/v1/josemanuel31675-cv/visits`;
+    const questionsUrl = `https://api.counterapi.dev/v1/josemanuel31675-cv/questions`;
     
-    // Attempt 1: Using corsproxy.io (usually more reliable for raw JSON)
     try {
-        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl + '?t=' + Date.now())}`;
-        console.log("Trying corsproxy.io...");
-        
-        const response = await fetch(proxyUrl);
-        if (response.ok) {
-            const data = await response.json();
-            console.log("Success with corsproxy.io");
-            jsonArea.value = JSON.stringify(data, null, 4);
-            countDisplay.innerText = data.count;
-            return; // Success!
+        // Attempt 1: Using corsproxy.io for both
+        const [vRes, qRes] = await Promise.all([
+            fetch(`https://corsproxy.io/?${encodeURIComponent(visitsUrl)}`),
+            fetch(`https://corsproxy.io/?${encodeURIComponent(questionsUrl)}`)
+        ]);
+
+        if (vRes.ok && qRes.ok) {
+            const vData = await vRes.json();
+            const qData = await qRes.json();
+            
+            countDisplay.innerText = vData.count;
+            questionsDisplay.innerText = qData.count;
+            jsonArea.value = `Visits API:\n${JSON.stringify(vData, null, 2)}\n\nQuestions API:\n${JSON.stringify(qData, null, 2)}`;
+            return;
         }
     } catch (e) {
-        console.warn("corsproxy.io failed, trying allorigins...");
+        console.warn("Proxy failed, trying fallback...");
     }
 
-    // Attempt 2: Using allorigins.win as fallback
-    try {
-        const fallbackProxy = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}&t=${Date.now()}`;
-        const response = await fetch(fallbackProxy);
-        const wrapper = await response.json();
-        
-        if (wrapper && wrapper.contents) {
-            jsonArea.value = wrapper.contents;
-            const stats = JSON.parse(wrapper.contents);
-            countDisplay.innerText = stats.count || "0";
-            return; // Success!
-        }
-    } catch (e) {
-        console.error("All proxies failed.");
-    }
-
-    // Fallback if everything fails
-    jsonArea.value = "CORS block detected. The browser prevented reading the JSON directly.\n\nYou can manually verify the data at:\n" + targetUrl;
-    const badgeUrl = `https://api.counterapi.dev/v1/josemanuel31675-cv/visits/badge.svg?t=${Date.now()}`;
-    countDisplay.innerHTML = `<img src="${badgeUrl}" alt="Visits Badge" style="transform: scale(1.5);">`;
+    // Simple fallback if retrieval fails
+    countDisplay.innerText = "Error";
+    questionsDisplay.innerText = "Error";
 }
