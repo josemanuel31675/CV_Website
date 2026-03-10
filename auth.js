@@ -33,20 +33,24 @@ async function hashString(str) {
 async function loadStats() {
     const countDisplay = document.getElementById('visit-count');
     try {
-        // Since original fetch fails CORS, we use JSONP or a proxy-less approach
-        // However, for counterapi.dev, we'll try a simpler fetch first
-        const response = await fetch('https://api.counterapi.dev/v1/josemanuel31675-cv/visits');
+        // We use a CORS Proxy to bypass the browser restriction
+        // This is a common solution for static sites accessing APIs without CORS headers
+        const targetUrl = 'https://api.counterapi.dev/v1/josemanuel31675-cv/visits';
+        const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrl);
+
+        const response = await fetch(proxyUrl);
         const data = await response.json();
         
-        if (data && data.count !== undefined) {
-            countDisplay.innerText = data.count;
+        // allorigins returns the content inside a 'contents' string as JSON
+        const stats = JSON.parse(data.contents);
+        
+        if (stats && stats.count !== undefined) {
+            countDisplay.innerText = stats.count;
         } else {
-            throw new Error('Invalid data');
+            throw new Error('Invalid data format');
         }
     } catch (error) {
         console.error('Fetch error:', error);
-        // Fallback: If CORS blocks the JSON fetch, we can use a JSONP-like trick or just show the direct info
-        // But since you can see the JSON manually, the API works, it's just the Browser blocking the JS read.
-        countDisplay.innerHTML = `<span style="font-size: 1rem; color: #666;">CORS Blocked by Browser.<br>The data is safe on the server.<br><a href="https://api.counterapi.dev/v1/josemanuel31675-cv/visits" target="_blank" style="color:var(--primary); text-decoration: underline;">Click here to see current count</a></span>`;
+        countDisplay.innerHTML = `<span style="font-size: 1rem; color: #666;">Unable to load stats automatically.<br><a href="https://api.counterapi.dev/v1/josemanuel31675-cv/visits" target="_blank" style="color:var(--primary); text-decoration: underline;">Click here to see count (6+)</a></span>`;
     }
 }
