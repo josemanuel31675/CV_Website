@@ -34,37 +34,38 @@ async function loadStats() {
     const countDisplay = document.getElementById('visit-count');
     countDisplay.innerText = "Loading...";
     
+    // Most reliable method for GitHub Pages: Use the SVG Badge
+    // This BYPASSES all CORS issues because it is an Image
+    const badgeUrl = `https://api.counterapi.dev/v1/josemanuel31675-cv/visits/badge.svg?t=${Date.now()}`;
+    
+    countDisplay.innerHTML = `
+        <div style="padding: 20px;">
+            <img src="${badgeUrl}" alt="Visits Count" style="transform: scale(2); margin-bottom: 20px;">
+            <p style="font-size: 0.9rem; color: #666; margin-top: 15px;">
+                Badge updated in real-time.
+            </p>
+            <a href="https://api.counterapi.dev/v1/josemanuel31675-cv/visits" 
+               target="_blank" 
+               style="font-size: 0.8rem; color: var(--primary); text-decoration: underline;">
+               View Raw JSON Data
+            </a>
+        </div>
+    `;
+    
+    // Still try to fetch the number for the large display if possible (using a different proxy)
     try {
-        // Cache buster para evitar resultados viejos
-        const ts = Date.now();
-        const targetUrl = `https://api.counterapi.dev/v1/josemanuel31675-cv/visits?t=${ts}`;
-        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+        const targetUrl = `https://api.counterapi.dev/v1/josemanuel31675-cv/visits`;
+        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
 
-        console.log("Fetching stats from proxy...");
         const response = await fetch(proxyUrl);
-        
-        if (!response.ok) throw new Error('Proxy unreachable');
-        
-        const data = await response.json();
-        const stats = JSON.parse(data.contents);
-        
-        if (stats && stats.count !== undefined) {
-            console.log("Stats loaded successfully:", stats.count);
-            countDisplay.innerText = stats.count;
-        } else {
-            throw new Error('Data structure invalid');
+        if (response.ok) {
+            const data = await response.json();
+            if (data && data.count !== undefined) {
+                // If successful, we can replace the badge with the clean number
+                countDisplay.innerHTML = `<div class="stat-number">${data.count}</div>`;
+            }
         }
     } catch (error) {
-        console.error('Detailed stats error:', error);
-        // Fallback final: Enlace directo
-        countDisplay.innerHTML = `
-            <div style="font-size: 1rem; color: #666;">
-                <p style="color: #e74c3c;">Blocked by Browser (CORS)</p>
-                <a href="https://api.counterapi.dev/v1/josemanuel31675-cv/visits" 
-                   target="_blank" 
-                   style="display: inline-block; margin-top: 10px; color: var(--primary); text-decoration: underline;">
-                   Click to view real-time count
-                </a>
-            </div>`;
+        console.warn("Proxy read failed, showing badge as fallback.");
     }
 }
