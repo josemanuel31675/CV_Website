@@ -33,33 +33,52 @@ async function hashString(str) {
 async function loadStats() {
     const countDisplay = document.getElementById('visit-count');
     const jsonArea = document.getElementById('raw-json');
-    countDisplay.innerText = "Loading...";
     
-    // Method: Use a proxy to get the JSON and display it in the textarea
-    try {
-        const targetUrl = `https://api.counterapi.dev/v1/josemanuel31675-cv/visits`;
-        // We'll use allorigins as it returns the data safely wrapped
-        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}&t=${Date.now()}`;
-
-        const response = await fetch(proxyUrl);
-        if (!response.ok) throw new Error('Proxy error');
-        
-        const wrapper = await response.json();
-        // The raw JSON string from the target is in wrapper.contents
-        jsonArea.value = wrapper.contents;
-        
-        const stats = JSON.parse(wrapper.contents);
-        if (stats && stats.count !== undefined) {
-            countDisplay.innerText = stats.count;
-        } else {
-            countDisplay.innerText = "Data Error";
-        }
-    } catch (error) {
-        console.error('Fetch error:', error);
-        jsonArea.value = "Error: Could not fetch JSON due to CORS or Network issues.";
-        
-        // Show the insignia as fallback if we can't get the JSON
-        const badgeUrl = `https://api.counterapi.dev/v1/josemanuel31675-cv/visits/badge.svg?t=${Date.now()}`;
-        countDisplay.innerHTML = `<img src="${badgeUrl}" alt="Visits Badge" style="transform: scale(1.5);">`;
+    if (!jsonArea) {
+        console.error("Textarea 'raw-json' not found in DOM.");
+        return;
     }
+
+    countDisplay.innerText = "Loading...";
+    jsonArea.value = "Initiating request...";
+    
+    const targetUrl = `https://api.counterapi.dev/v1/josemanuel31675-cv/visits`;
+    
+    // Attempt 1: Using corsproxy.io (usually more reliable for raw JSON)
+    try {
+        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl + '?t=' + Date.now())}`;
+        console.log("Trying corsproxy.io...");
+        
+        const response = await fetch(proxyUrl);
+        if (response.ok) {
+            const data = await response.json();
+            console.log("Success with corsproxy.io");
+            jsonArea.value = JSON.stringify(data, null, 4);
+            countDisplay.innerText = data.count;
+            return; // Success!
+        }
+    } catch (e) {
+        console.warn("corsproxy.io failed, trying allorigins...");
+    }
+
+    // Attempt 2: Using allorigins.win as fallback
+    try {
+        const fallbackProxy = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}&t=${Date.now()}`;
+        const response = await fetch(fallbackProxy);
+        const wrapper = await response.json();
+        
+        if (wrapper && wrapper.contents) {
+            jsonArea.value = wrapper.contents;
+            const stats = JSON.parse(wrapper.contents);
+            countDisplay.innerText = stats.count || "0";
+            return; // Success!
+        }
+    } catch (e) {
+        console.error("All proxies failed.");
+    }
+
+    // Fallback if everything fails
+    jsonArea.value = "CORS block detected. The browser prevented reading the JSON directly.\n\nYou can manually verify the data at:\n" + targetUrl;
+    const badgeUrl = `https://api.counterapi.dev/v1/josemanuel31675-cv/visits/badge.svg?t=${Date.now()}`;
+    countDisplay.innerHTML = `<img src="${badgeUrl}" alt="Visits Badge" style="transform: scale(1.5);">`;
 }
