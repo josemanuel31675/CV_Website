@@ -32,40 +32,34 @@ async function hashString(str) {
 
 async function loadStats() {
     const countDisplay = document.getElementById('visit-count');
+    const jsonArea = document.getElementById('raw-json');
     countDisplay.innerText = "Loading...";
     
-    // Most reliable method for GitHub Pages: Use the SVG Badge
-    // This BYPASSES all CORS issues because it is an Image
-    const badgeUrl = `https://api.counterapi.dev/v1/josemanuel31675-cv/visits/badge.svg?t=${Date.now()}`;
-    
-    countDisplay.innerHTML = `
-        <div style="padding: 20px;">
-            <img src="${badgeUrl}" alt="Visits Count" style="transform: scale(2); margin-bottom: 20px;">
-            <p style="font-size: 0.9rem; color: #666; margin-top: 15px;">
-                Badge updated in real-time.
-            </p>
-            <a href="https://api.counterapi.dev/v1/josemanuel31675-cv/visits" 
-               target="_blank" 
-               style="font-size: 0.8rem; color: var(--primary); text-decoration: underline;">
-               View Raw JSON Data
-            </a>
-        </div>
-    `;
-    
-    // Still try to fetch the number for the large display if possible (using a different proxy)
+    // Method: Use a proxy to get the JSON and display it in the textarea
     try {
         const targetUrl = `https://api.counterapi.dev/v1/josemanuel31675-cv/visits`;
-        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
+        // We'll use allorigins as it returns the data safely wrapped
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}&t=${Date.now()}`;
 
         const response = await fetch(proxyUrl);
-        if (response.ok) {
-            const data = await response.json();
-            if (data && data.count !== undefined) {
-                // If successful, we can replace the badge with the clean number
-                countDisplay.innerHTML = `<div class="stat-number">${data.count}</div>`;
-            }
+        if (!response.ok) throw new Error('Proxy error');
+        
+        const wrapper = await response.json();
+        // The raw JSON string from the target is in wrapper.contents
+        jsonArea.value = wrapper.contents;
+        
+        const stats = JSON.parse(wrapper.contents);
+        if (stats && stats.count !== undefined) {
+            countDisplay.innerText = stats.count;
+        } else {
+            countDisplay.innerText = "Data Error";
         }
     } catch (error) {
-        console.warn("Proxy read failed, showing badge as fallback.");
+        console.error('Fetch error:', error);
+        jsonArea.value = "Error: Could not fetch JSON due to CORS or Network issues.";
+        
+        // Show the insignia as fallback if we can't get the JSON
+        const badgeUrl = `https://api.counterapi.dev/v1/josemanuel31675-cv/visits/badge.svg?t=${Date.now()}`;
+        countDisplay.innerHTML = `<img src="${badgeUrl}" alt="Visits Badge" style="transform: scale(1.5);">`;
     }
 }
