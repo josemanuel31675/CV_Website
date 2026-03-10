@@ -38,4 +38,21 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
     `;
     navContainer.innerHTML = navHTML;
+
+    // Inject Chatbot resources
+    if (!document.getElementById('chatbot-css')) {
+        const link = document.createElement('link');
+        link.id = 'chatbot-css';
+        link.rel = 'stylesheet';
+        link.href = 'chatbot.css';
+        document.head.appendChild(link);
+    }
+    
+    if (!document.getElementById('chatbot-js')) {
+        const script = document.createElement('script');
+        script.id = 'chatbot-js';
+        script.src = 'chatbot.js';
+        document.body.appendChild(script);
+    }
 });
+
