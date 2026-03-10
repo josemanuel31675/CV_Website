@@ -12,6 +12,9 @@
         // Generate a random unique ID for this specific session
         sessionID = 'cv_sess_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now();
         sessionStorage.setItem('cv_session_id', sessionID);
+
+        // Increment visitor counter (Anonymous tracking)
+        fetch('https://api.countapi.xyz/hit/josemanuel31675-cv/visits').catch(() => {});
         
         // On their very first hit of this session, if they aren't on Home, redirect them
         if (page !== 'index.html' && page !== '') {
