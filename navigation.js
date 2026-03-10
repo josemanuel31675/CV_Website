@@ -43,6 +43,9 @@ async function logToGoogleSheet(data) {
     }
 }
 
+// Versioning for cache busting
+const JS_VERSION = "1.0.2";
+
 document.addEventListener('DOMContentLoaded', () => {
     const navContainer = document.getElementById('main-nav');
     if (!navContainer) return;
@@ -67,14 +70,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const link = document.createElement('link');
         link.id = 'chatbot-css';
         link.rel = 'stylesheet';
-        link.href = 'chatbot.css';
+        link.href = `chatbot.css?v=${JS_VERSION}`;
         document.head.appendChild(link);
     }
 
     if (!document.getElementById('chatbot-js')) {
         const script = document.createElement('script');
         script.id = 'chatbot-js';
-        script.src = 'chatbot.min.js';
+        script.src = `chatbot.min.js?v=${JS_VERSION}`;
         document.body.appendChild(script);
     }
 });
