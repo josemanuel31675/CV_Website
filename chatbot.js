@@ -45,10 +45,19 @@ const initChatbot = () => {
 
     // Fetch dynamic knowledge from Google Sheets
     if (typeof GOOGLE_SCRIPT_URL !== 'undefined' && GOOGLE_SCRIPT_URL !== "YOUR_GOOGLE_SCRIPT_URL") {
+        console.log("Chatbot: Intentando cargar datos desde Google Sheets...");
         fetch(GOOGLE_SCRIPT_URL)
             .then(res => res.json())
-            .then(data => { DYNAMIC_DATA = data; })
-            .catch(e => console.warn("Could not load dynamic data"));
+            .then(data => { 
+                DYNAMIC_DATA = data; 
+                console.log("Chatbot: Datos cargados con éxito:", DYNAMIC_DATA);
+            })
+            .catch(e => {
+                console.warn("Chatbot: Error cargando datos dinámicos:", e);
+                DYNAMIC_DATA = {};
+            });
+    } else {
+        console.error("Chatbot: GOOGLE_SCRIPT_URL no está configurada correctamente.");
     }
 
     const bubble = document.getElementById('cb-bubble');
