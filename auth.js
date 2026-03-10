@@ -32,28 +32,39 @@ async function hashString(str) {
 
 async function loadStats() {
     const countDisplay = document.getElementById('visit-count');
+    countDisplay.innerText = "Loading...";
+    
     try {
-        // Usamos el proxy para saltar el bloqueo de CORS del navegador
-        const targetUrl = 'https://api.counterapi.dev/v1/josemanuel31675-cv/visits';
-        const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrl);
+        // Cache buster para evitar resultados viejos
+        const ts = Date.now();
+        const targetUrl = `https://api.counterapi.dev/v1/josemanuel31675-cv/visits?t=${ts}`;
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
 
+        console.log("Fetching stats from proxy...");
         const response = await fetch(proxyUrl);
-        if (!response.ok) throw new Error('Network response was not ok');
+        
+        if (!response.ok) throw new Error('Proxy unreachable');
         
         const data = await response.json();
-        // Convertimos el contenido que viene del proxy (es un string) a JSON
         const stats = JSON.parse(data.contents);
         
         if (stats && stats.count !== undefined) {
+            console.log("Stats loaded successfully:", stats.count);
             countDisplay.innerText = stats.count;
         } else {
-            throw new Error('Invalid data format');
+            throw new Error('Data structure invalid');
         }
     } catch (error) {
-        console.error('Fetch error:', error);
+        console.error('Detailed stats error:', error);
+        // Fallback final: Enlace directo
         countDisplay.innerHTML = `
-            <span style="font-size: 1rem; color: #e74c3c;">
-                Error al conectar con el contador.
-            </span>`;
+            <div style="font-size: 1rem; color: #666;">
+                <p style="color: #e74c3c;">Blocked by Browser (CORS)</p>
+                <a href="https://api.counterapi.dev/v1/josemanuel31675-cv/visits" 
+                   target="_blank" 
+                   style="display: inline-block; margin-top: 10px; color: var(--primary); text-decoration: underline;">
+                   Click to view real-time count
+                </a>
+            </div>`;
     }
 }
