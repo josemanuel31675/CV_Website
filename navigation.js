@@ -8,10 +8,10 @@
         sessionID = 'cv_sess_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now();
         sessionStorage.setItem('cv_session_id', sessionID);
 
-        // Increment visitor counter using Image object to bypass CORS completely for the hit
-        // This ensures the count goes up even if the API doesn't send CORS headers
+        // Increment visitor counter using Image object to bypass CORS completely
+        // Switching back to countapi.xyz which has better CORS support for reading
         const hit = new Image();
-        hit.src = 'https://api.counterapi.dev/v1/josemanuel31675-cv/visits/up';
+        hit.src = 'https://api.countapi.xyz/hit/josemanuel31675-cv-portfolio/visits';
         
         if (page !== 'index.html' && page !== '') {
             window.location.href = 'index.html';

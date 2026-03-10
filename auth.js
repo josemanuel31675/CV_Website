@@ -33,23 +33,20 @@ async function hashString(str) {
 async function loadStats() {
     const countDisplay = document.getElementById('visit-count');
     try {
-        // Use a mode: 'cors' request and handle potential blocks
-        const response = await fetch('https://api.counterapi.dev/v1/josemanuel31675-cv/visits', {
-            method: 'GET',
-            mode: 'cors',
-            headers: { 'Accept': 'application/json' }
-        });
-
-        if (!response.ok) {
-             countDisplay.innerText = 'Offline';
-             return;
-        }
-
+        // Since original fetch fails CORS, we use JSONP or a proxy-less approach
+        // However, for counterapi.dev, we'll try a simpler fetch first
+        const response = await fetch('https://api.counterapi.dev/v1/josemanuel31675-cv/visits');
         const data = await response.json();
-        countDisplay.innerText = data.count !== undefined ? data.count : '0';
+        
+        if (data && data.count !== undefined) {
+            countDisplay.innerText = data.count;
+        } else {
+            throw new Error('Invalid data');
+        }
     } catch (error) {
         console.error('Fetch error:', error);
-        // Fallback info if CORS truly blocks the GET request
-        countDisplay.innerHTML = '<span style="font-size: 1rem; color: #666;">CORS Blocked. View stats at: <br> <a href="https://api.counterapi.dev/v1/josemanuel31675-cv/visits" target="_blank" style="color:blue">API Link</a></span>';
+        // Fallback: If CORS blocks the JSON fetch, we can use a JSONP-like trick or just show the direct info
+        // But since you can see the JSON manually, the API works, it's just the Browser blocking the JS read.
+        countDisplay.innerHTML = `<span style="font-size: 1rem; color: #666;">CORS Blocked by Browser.<br>The data is safe on the server.<br><a href="https://api.counterapi.dev/v1/josemanuel31675-cv/visits" target="_blank" style="color:var(--primary); text-decoration: underline;">Click here to see current count</a></span>`;
     }
 }
