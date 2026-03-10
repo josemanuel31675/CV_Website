@@ -33,15 +33,15 @@ async function hashString(str) {
 async function loadStats() {
     const countDisplay = document.getElementById('visit-count');
     try {
-        // We use a CORS Proxy to bypass the browser restriction
-        // This is a common solution for static sites accessing APIs without CORS headers
+        // Usamos el proxy para saltar el bloqueo de CORS del navegador
         const targetUrl = 'https://api.counterapi.dev/v1/josemanuel31675-cv/visits';
         const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrl);
 
         const response = await fetch(proxyUrl);
-        const data = await response.json();
+        if (!response.ok) throw new Error('Network response was not ok');
         
-        // allorigins returns the content inside a 'contents' string as JSON
+        const data = await response.json();
+        // Convertimos el contenido que viene del proxy (es un string) a JSON
         const stats = JSON.parse(data.contents);
         
         if (stats && stats.count !== undefined) {
@@ -51,6 +51,9 @@ async function loadStats() {
         }
     } catch (error) {
         console.error('Fetch error:', error);
-        countDisplay.innerHTML = `<span style="font-size: 1rem; color: #666;">Unable to load stats automatically.<br><a href="https://api.counterapi.dev/v1/josemanuel31675-cv/visits" target="_blank" style="color:var(--primary); text-decoration: underline;">Click here to see count (6+)</a></span>`;
+        countDisplay.innerHTML = `
+            <span style="font-size: 1rem; color: #e74c3c;">
+                Error al conectar con el contador.
+            </span>`;
     }
 }
