@@ -6,17 +6,21 @@
     let sessionID = sessionStorage.getItem('cv_session_id');
 
     if (!sessionID) {
-        // Clear any old legacy identification in localStorage if it exists
+        // Clear old legacy markers
         localStorage.removeItem('cv_visited'); 
 
-        // Generate a random unique ID for this specific session
+        // Generate a random unique ID for this session
         sessionID = 'cv_sess_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now();
         sessionStorage.setItem('cv_session_id', sessionID);
 
-        // Increment visitor counter (Anonymous tracking)
-        fetch('https://api.countapi.xyz/hit/josemanuel31675-cv/visits').catch(() => {});
+        // Increment visitor counter using a more reliable provider
+        // Service: counterapi.dev
+        fetch('https://api.counterapi.dev/v1/josemanuel31675-cv/visits/up')
+            .then(response => response.json())
+            .then(data => console.log('Visit tracked'))
+            .catch(err => console.error('Tracking error:', err));
         
-        // On their very first hit of this session, if they aren't on Home, redirect them
+        // Redirect to Home if landing elsewhere for the first time
         if (page !== 'index.html' && page !== '') {
             window.location.href = 'index.html';
             return;
@@ -28,7 +32,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const navContainer = document.getElementById('main-nav');
     if (!navContainer) return;
 
-    // Get current page filename
     const path = window.location.pathname;
     const page = path.split("/").pop() || 'index.html';
 

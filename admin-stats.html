@@ -87,9 +87,9 @@
 
         async function loadStats() {
             try {
-                const response = await fetch('https://api.countapi.xyz/get/josemanuel31675-cv/visits');
+                const response = await fetch('https://api.counterapi.dev/v1/josemanuel31675-cv/visits');
                 const data = await response.json();
-                document.getElementById('visit-count').innerText = data.value;
+                document.getElementById('visit-count').innerText = data.count || 0;
             } catch (error) {
                 document.getElementById('visit-count').innerText = 'Error';
             }
