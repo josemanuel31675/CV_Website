@@ -44,21 +44,25 @@ const initChatbot = () => {
     document.body.insertAdjacentHTML('beforeend', chatbotHTML);
 
     // Dynamic Knowledge System
-    const reloadDynamicData = () => {
-        if (typeof GOOGLE_SCRIPT_URL !== 'undefined' && GOOGLE_SCRIPT_URL.indexOf("YOUR_GOOGLE_SCRIPT_URL") === -1) {
-            fetch(`${GOOGLE_SCRIPT_URL}?t=${Date.now()}`) // Cache busting for the fetch itself
-                .then(res => res.json())
-                .then(data => { 
-                    DYNAMIC_DATA = data; 
-                    console.log("Chatbot: Conocimiento actualizado desde Google Sheets.");
-                })
-                .catch(e => console.warn("Chatbot: Error en actualización automática"));
+    const reloadDynamicData = async () => {
+        if (typeof GOOGLE_SCRIPT_URL === 'undefined' || GOOGLE_SCRIPT_URL.indexOf("YOUR_GOOGLE_SCRIPT_URL") !== -1) return;
+        
+        try {
+            // Using a simple fetch with a cache-buster query
+            const response = await fetch(`${GOOGLE_SCRIPT_URL}?cb=${Date.now()}`);
+            if (response.ok) {
+                const data = await response.json();
+                DYNAMIC_DATA = data;
+                console.log("Chatbot: Conocimiento actualizado.");
+            }
+        } catch (e) {
+            console.warn("Chatbot: Reintentando conexión en el próximo ciclo...");
         }
     };
 
-    // Initial load and auto-refresh every 2 minutes
+    // Initial load and auto-refresh every 5 minutes
     reloadDynamicData();
-    setInterval(reloadDynamicData, 120000);
+    setInterval(reloadDynamicData, 300000);
 
     const bubble = document.getElementById('cb-bubble');
     const windowChat = document.getElementById('cb-window');
